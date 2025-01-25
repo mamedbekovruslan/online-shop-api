@@ -1,12 +1,17 @@
 import express from "express";
+import { pool } from "./src/config/db.js";
 
 const app = express();
-const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+pool.query("SELECT NOW()", (err, res) => {
+  if (err) {
+    console.error("Error connecting to the database", err.stack);
+  } else {
+    console.log("Connected to the database:", res.rows);
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Server started on port ${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

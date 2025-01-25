@@ -1,6 +1,7 @@
 {
   "name": "online-shop-api",
   "version": "1.0.0",
+  "type": "module",
   "description": "online shop backend",
   "main": "index.js",
   "scripts": {
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/mamedbekovruslan/online-shop-api/issues"
   },
-  "homepage": "https://github.com/mamedbekovruslan/online-shop-api#readme"
+  "homepage": "https://github.com/mamedbekovruslan/online-shop-api#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
 }

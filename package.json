@@ -1,0 +1,19 @@
+{
+  "name": "online-shop-api",
+  "version": "1.0.0",
+  "description": "online shop backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mamedbekovruslan/online-shop-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mamedbekovruslan/online-shop-api/issues"
+  },
+  "homepage": "https://github.com/mamedbekovruslan/online-shop-api#readme"
+}

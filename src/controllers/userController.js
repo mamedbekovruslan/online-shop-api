@@ -2,9 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { pool } from "../config/db.js";
 
-const SECRET_KEY = process.env.JWT_SECRET; // Используй переменные окружения
+const SECRET_KEY = process.env.JWT_SECRET;
 
-// Регистрация пользователя
 export const registerUser = async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -19,7 +18,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// Авторизация пользователя
 export const loginUser = async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -44,7 +42,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// Проверка токена
 export const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "Unauthorized" });

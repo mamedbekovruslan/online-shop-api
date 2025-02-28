@@ -6,6 +6,7 @@ import {
   addProduct,
   updateProduct,
   patchProduct,
+  placeOrder,
 } from "../controllers/productController.js";
 import { getCategories } from "../controllers/categorieController.js";
 
@@ -19,3 +20,4 @@ router.delete("/products/:id", deleteProduct);
 router.post("/products", addProduct);
 router.put("/products/:id", updateProduct);
 router.patch("/products/:id", patchProduct);
+router.post("/order", placeOrder);

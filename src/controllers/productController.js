@@ -1,6 +1,5 @@
 import { pool } from "../config/db.js";
 
-// Получение продуктов (не изменилось)
 export const getProducts = async (req, res) => {
   const { category_id } = req.query;
 
@@ -21,7 +20,6 @@ export const getProducts = async (req, res) => {
   }
 };
 
-// Удаление товара
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
 
@@ -35,9 +33,8 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const addProduct = async (req, res) => {
-  const { name, category_id, price, quantity, photo } = req.body; // Изменил image -> photo
+  const { name, category_id, price, quantity, photo } = req.body;
 
-  // Проверка данных
   if (typeof name !== "string" || !name.trim()) {
     return res.status(400).json({ error: "Invalid name" });
   }
@@ -76,7 +73,6 @@ export const addProduct = async (req, res) => {
   }
 };
 
-// Полное обновление товара
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, category_id, price, quantity, photo } = req.body;
@@ -106,7 +102,6 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-// Частичное обновление товара
 export const patchProduct = async (req, res) => {
   const { id } = req.params;
   const fields = [];
@@ -137,5 +132,35 @@ export const patchProduct = async (req, res) => {
     res
       .status(500)
       .json({ error: "Error updating product", details: err.message });
+  }
+};
+
+export const placeOrder = async (req, res) => {
+  const { items } = req.body; // [{ id, quantity }]
+
+  try {
+    for (const item of items) {
+      const productQuery = "SELECT quantity FROM products WHERE id = $1";
+      const productResult = await pool.query(productQuery, [item.id]);
+
+      if (productResult.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ error: `Product with ID ${item.id} not found` });
+      }
+
+      const currentQuantity = productResult.rows[0].quantity;
+      const newQuantity = currentQuantity - item.quantity;
+
+      const updateQuery = "UPDATE products SET quantity = $1 WHERE id = $2";
+      await pool.query(updateQuery, [Math.max(newQuantity, 0), item.id]); // Устанавливаем 0, если значение отрицательное
+    }
+
+    res.status(200).json({ message: "Order placed successfully" });
+  } catch (err) {
+    console.error("Error placing order:", err);
+    res
+      .status(500)
+      .json({ error: "Error placing order", details: err.message });
   }
 };

@@ -35,8 +35,13 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: "1h" });
-    res.status(200).json({ token });
+    // Проверяем, является ли пользователь админом
+    const role = user.role === "admin" ? "admin" : "user";
+
+    const token = jwt.sign({ id: user.id, role }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    res.status(200).json({ token, username: user.username, role });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -1,5 +1,14 @@
 import express from "express";
-import { registerUser, loginUser } from "../controllers/userController.js";
+import {
+  registerUser,
+  loginUser,
+  getUsers,
+  deleteUser,
+  updateUser,
+  verifyToken,
+  verifyAdmin,
+  addUser,
+} from "../controllers/userController.js";
 import {
   deleteProduct,
   getProducts,
@@ -21,3 +30,7 @@ router.post("/products", addProduct);
 router.put("/products/:id", updateProduct);
 router.patch("/products/:id", patchProduct);
 router.post("/order", placeOrder);
+router.get("/users", verifyToken, verifyAdmin, getUsers);
+router.delete("/users/:id", verifyToken, verifyAdmin, deleteUser);
+router.put("/users/:id", verifyToken, verifyAdmin, updateUser);
+router.post("/users", verifyToken, verifyAdmin, addUser);

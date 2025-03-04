@@ -1,4 +1,21 @@
 import { pool } from "../config/db.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Конфигурация для хранения файлов
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = "uploads/";
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Уникальное имя файла
+  },
+});
 
 export const getProducts = async (req, res) => {
   const { category_id } = req.query;
@@ -51,43 +68,27 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const addProduct = async (req, res) => {
-  const { name, category_id, price, quantity, photo } = req.body;
-
-  if (typeof name !== "string" || !name.trim()) {
-    return res.status(400).json({ error: "Invalid name" });
-  }
-
-  if (isNaN(category_id) || !Number.isInteger(Number(category_id))) {
-    return res.status(400).json({ error: "Invalid category_id" });
-  }
-
-  if (isNaN(price) || price <= 0) {
-    return res.status(400).json({ error: "Invalid price" });
-  }
-
-  if (isNaN(quantity) || quantity <= 0) {
-    return res.status(400).json({ error: "Invalid quantity" });
-  }
-
   try {
+    const { name, category_id, price, quantity } = req.body;
+    const photo = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!name || !category_id || !price || !quantity) {
+      return res.status(400).json({ error: "Все поля должны быть заполнены" });
+    }
+
     const query = `
       INSERT INTO products (name, category_id, price, quantity, photo)
       VALUES ($1, $2, $3, $4, $5) RETURNING *;
     `;
     const values = [name, category_id, price, quantity, photo];
 
-    console.log("Query to execute:", query);
-    console.log("Values:", values);
-
     const result = await pool.query(query, values);
-    console.log("Product added successfully:", result.rows[0]);
-
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error("Error adding product:", err);
     res
       .status(500)
-      .json({ error: "Error adding product", details: err.message });
+      .json({ error: "Ошибка добавления товара", details: err.message });
   }
 };
 
@@ -121,35 +122,45 @@ export const updateProduct = async (req, res) => {
 };
 
 export const patchProduct = async (req, res) => {
-  const { id } = req.params;
-  const fields = [];
-  const values = [];
-
-  Object.entries(req.body).forEach(([key, value], index) => {
-    fields.push(`${key} = $${index + 1}`);
-    values.push(value);
-  });
-
-  if (fields.length === 0) {
-    return res.status(400).json({ error: "No fields provided for update" });
-  }
-
   try {
-    const query = `UPDATE products SET ${fields.join(", ")} WHERE id = $${
-      values.length + 1
-    } RETURNING *;`;
+    const { id } = req.params;
+    const updates = [];
+    const values = [];
+
+    // Проверяем текстовые поля
+    Object.entries(req.body).forEach(([key, value], index) => {
+      if (value) {
+        updates.push(`${key} = $${values.length + 1}`);
+        values.push(value);
+      }
+    });
+
+    // Если загружено новое изображение
+    if (req.file) {
+      updates.push(`photo = $${values.length + 1}`);
+      values.push(`/uploads/${req.file.filename}`);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: "Нет данных для обновления" });
+    }
+
     values.push(id);
+    const query = `UPDATE products SET ${updates.join(", ")} WHERE id = $${
+      values.length
+    } RETURNING *;`;
 
     const result = await pool.query(query, values);
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({ error: "Товар не найден" });
     }
 
     res.status(200).json(result.rows[0]);
   } catch (err) {
+    console.error("Ошибка обновления товара:", err);
     res
       .status(500)
-      .json({ error: "Error updating product", details: err.message });
+      .json({ error: "Ошибка обновления товара", details: err.message });
   }
 };
 

@@ -19,6 +19,9 @@ import {
   getProductById,
 } from "../controllers/productController.js";
 import { getCategories } from "../controllers/categorieController.js";
+import multer from "multer";
+
+const upload = multer({ dest: "uploads/" });
 
 export const router = express.Router();
 
@@ -28,9 +31,9 @@ router.get("/categories", getCategories);
 router.get("/products", getProducts);
 router.get("/products/:id", getProductById);
 router.delete("/products/:id", deleteProduct);
-router.post("/products", addProduct);
-router.put("/products/:id", updateProduct);
-router.patch("/products/:id", patchProduct);
+router.post("/products", upload.single("photo"), addProduct);
+router.put("/products/:id", upload.single("photo"), updateProduct);
+router.patch("/products/:id", upload.single("photo"), patchProduct);
 router.post("/order", placeOrder);
 router.get("/users", verifyToken, verifyAdmin, getUsers);
 router.delete("/users/:id", verifyToken, verifyAdmin, deleteUser);

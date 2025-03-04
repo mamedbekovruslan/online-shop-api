@@ -16,6 +16,7 @@ import {
   updateProduct,
   patchProduct,
   placeOrder,
+  getProductById,
 } from "../controllers/productController.js";
 import { getCategories } from "../controllers/categorieController.js";
 
@@ -25,6 +26,7 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/categories", getCategories);
 router.get("/products", getProducts);
+router.get("/products/:id", getProductById);
 router.delete("/products/:id", deleteProduct);
 router.post("/products", addProduct);
 router.put("/products/:id", updateProduct);

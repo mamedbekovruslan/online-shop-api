@@ -3,19 +3,25 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Конфигурация для хранения файлов
+// Создаём папку uploads, если её нет
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// Конфигурируем Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = "uploads/";
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Уникальное имя файла
+    // Добавляем расширение к файлу
+    const ext = path.extname(file.originalname); // Например: .jpg, .png
+    cb(null, Date.now() + ext);
   },
 });
+
+export const upload = multer({ storage });
 
 export const getProducts = async (req, res) => {
   const { category_id } = req.query;
@@ -67,6 +73,7 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+// Добавление товара с фото
 export const addProduct = async (req, res) => {
   try {
     const { name, category_id, price, quantity } = req.body;
@@ -85,39 +92,37 @@ export const addProduct = async (req, res) => {
     const result = await pool.query(query, values);
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Error adding product:", err);
+    console.error("Ошибка добавления товара:", err);
     res
       .status(500)
       .json({ error: "Ошибка добавления товара", details: err.message });
   }
 };
 
+// Обновление товара
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, category_id, price, quantity, photo } = req.body;
-
-  if (!name || !category_id || !price || !quantity || !photo) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
+  const { name, category_id, price, quantity } = req.body;
+  const photo = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
     const query = `
       UPDATE products 
-      SET name = $1, category_id = $2, price = $3, quantity = $4, photo = $5
+      SET name = $1, category_id = $2, price = $3, quantity = $4, photo = COALESCE($5, photo)
       WHERE id = $6 RETURNING *;
     `;
     const values = [name, category_id, price, quantity, photo, id];
 
     const result = await pool.query(query, values);
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({ error: "Товар не найден" });
     }
 
     res.status(200).json(result.rows[0]);
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Error updating product", details: err.message });
+      .json({ error: "Ошибка обновления товара", details: err.message });
   }
 };
 

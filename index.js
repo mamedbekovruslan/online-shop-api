@@ -20,6 +20,7 @@ app.use(express.json());
 
 // Основной маршрут
 app.use("/api", router);
+app.use("/uploads", express.static("uploads"));
 
 // Базовая проверка для сервера
 app.get("/", (req, res) => {

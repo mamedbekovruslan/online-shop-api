@@ -3,21 +3,19 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Создаём папку uploads, если её нет
+// Директория для загрузок
 const uploadDir = "uploads/";
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Конфигурируем Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // Добавляем расширение к файлу
-    const ext = path.extname(file.originalname); // Например: .jpg, .png
-    cb(null, Date.now() + ext);
+    const ext = path.extname(file.originalname); // Получаем расширение
+    cb(null, `${Date.now()}${ext}`); // Добавляем расширение к имени файла
   },
 });
 

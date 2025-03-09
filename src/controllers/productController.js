@@ -16,6 +16,8 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase(); // Получаем расширение
     const filename = `${Date.now()}${ext}`; // Генерируем имя с расширением
+    console.log("Исходное имя файла:", file.originalname);
+    console.log("Файл сохранён как:", filename);
     cb(null, filename);
   },
 });

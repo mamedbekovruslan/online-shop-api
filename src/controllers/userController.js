@@ -6,15 +6,35 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 export const registerUser = async (req, res) => {
   const { username, email, password, role = "user" } = req.body;
+
   try {
+    // Проверяем, существует ли пользователь с таким же username или email
+    const existingUser = await pool.query(
+      "SELECT * FROM users WHERE username = $1 OR email = $2",
+      [username, email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res
+        .status(409)
+        .json({
+          message: "Пользователь с таким логином или email уже существует",
+        });
+    }
+
+    // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Добавляем нового пользователя
     await pool.query(
       "INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, $4)",
       [username, email, hashedPassword, role]
     );
+
     res.status(201).json({ message: "Пользователь успешно зарегистрирован" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Ошибка при регистрации:", err);
+    res.status(500).json({ error: "Ошибка сервера" });
   }
 };
 

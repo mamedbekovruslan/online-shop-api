@@ -3,6 +3,7 @@ import cors from "cors";
 import { router } from "./src/routes/index.js";
 import dotenv from "dotenv";
 dotenv.config();
+console.log("🚀 Сервер загружается...");
 
 const PORT = process.env.PORT || 3000;
 

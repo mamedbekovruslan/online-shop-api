@@ -9,7 +9,13 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // Разрешает запросы со всех доменов (для теста, потом можно ограничить)
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 // Основной маршрут

@@ -76,6 +76,8 @@ export const deleteProduct = async (req, res) => {
 
 // Добавление товара с фото
 export const addProduct = async (req, res) => {
+  console.log("🔹 Данные из запроса:", req.body);
+  console.log("🔹 Загруженный файл:", req.file);
   try {
     const { name, category_id, price, quantity } = req.body;
     const photo = req.file ? `/uploads/${req.file.filename}` : null;

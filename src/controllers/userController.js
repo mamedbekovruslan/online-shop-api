@@ -15,11 +15,9 @@ export const registerUser = async (req, res) => {
     );
 
     if (existingUser.rows.length > 0) {
-      return res
-        .status(409)
-        .json({
-          message: "Пользователь с таким логином или email уже существует",
-        });
+      return res.status(409).json({
+        message: "Пользователь с таким логином или email уже существует",
+      });
     }
 
     // Хешируем пароль
@@ -55,9 +53,18 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Неверные учетные данные" });
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      {
+        id: user.id,
+        role: user.role,
+        username: user.username,
+        email: user.email,
+      },
+      SECRET_KEY,
+      {
+        expiresIn: "1h",
+      }
+    );
     res.status(200).json({ token, username: user.username, role: user.role });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -127,6 +134,7 @@ export const verifyToken = (req, res, next) => {
     const decoded = jwt.verify(token, SECRET_KEY);
     req.userId = decoded.id;
     req.userRole = decoded.role;
+    req.user = decoded; // ✅ добавь
     next();
   } catch (err) {
     res.status(403).json({ message: "Недействительный токен" });

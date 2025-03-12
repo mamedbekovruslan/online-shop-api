@@ -34,7 +34,7 @@ router.delete("/products/:id", deleteProduct);
 router.post("/products", upload.single("photo"), addProduct);
 router.put("/products/:id", upload.single("photo"), updateProduct);
 router.patch("/products/:id", upload.single("photo"), patchProduct);
-router.post("/order", placeOrder);
+router.post("/order", verifyToken, placeOrder);
 router.get("/users", verifyToken, verifyAdmin, getUsers);
 router.delete("/users/:id", verifyToken, verifyAdmin, deleteUser);
 router.put("/users/:id", verifyToken, verifyAdmin, updateUser);
